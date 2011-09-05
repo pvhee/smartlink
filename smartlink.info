@@ -1,0 +1,7 @@
+; $Id$
+name = SmartLink
+description = SmartLink for ApplyRapid
+core = 6.x
+package = CCK
+dependencies[] = content
+dependencies[] = content_profile

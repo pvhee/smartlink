@@ -1,0 +1,84 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Install file for the smartlink.module
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function smartlink_install() {
+  drupal_install_schema('smartlink');
+}
+
+/**
+ * Implementation of hook_schema()
+ */
+function smartlink_schema() {
+  $schema['smartlink'] = array(
+    'description' => 'Stores cached values of smartlink calculations applied to a user.',
+    'fields' => array(
+      'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => t('{node}.nid')
+      ),
+      'uid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => t('{users}.nid')
+      ),
+      'percent' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'default' => 0,
+        'description' => t('Smartlink score for the user.')
+      ),
+      'data' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'description' => t('Data regarding smartlink for user')
+      ),
+    ),
+    'primary key' => array('nid', 'uid'),
+    'indexes' => array(
+      'percent' => array('percent'),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function smartlink_uninstall() {
+  drupal_uninstall_schema('smartlink');
+//  variable_del('smartlink_hide_complete');
+//
+//  foreach (array_keys(smartlink_get_enabled_types()) as $type) {
+//    variable_del('smartlink_'. $type);
+//    variable_del('smartlink_fields_'. $type);
+//  }
+}
+
+/**
+ * Implementation of hook_disable().
+ */
+function smartlink_disable() {
+  // Clear the cache, it might not be valid anymore when the module is re-enabled.
+  //smartlink_clear_cache();
+}
+
+/**
+ * Install schema.
+ */
+function smartlink_update_6001() {
+  drupal_install_schema('smartlink');
+  return array();
+}
