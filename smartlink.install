@@ -59,12 +59,10 @@ function smartlink_schema() {
  */
 function smartlink_uninstall() {
   drupal_uninstall_schema('smartlink');
-//  variable_del('smartlink_hide_complete');
-//
-//  foreach (array_keys(smartlink_get_enabled_types()) as $type) {
-//    variable_del('smartlink_'. $type);
-//    variable_del('smartlink_fields_'. $type);
-//  }
+
+  foreach (array_keys(smartlink_get_enabled_types()) as $type) {
+    variable_del('smartlink_'. $type);
+  }
 }
 
 /**
