@@ -39,7 +39,7 @@ function smartlink_calculate_tab_form_submit($form, &$form_state) {
 //}
 
 /**
- * Render a smartlink calculate form on node/id/smartlink_calculate pages.
+ * Render a smartlink application form
  */
 function smartlink_apply_form($smartlink_node, $user, $type = NULL) {
   $data = smartlink_get_data_user($user, $smartlink_node);
@@ -64,4 +64,13 @@ function smartlink_apply_form($smartlink_node, $user, $type = NULL) {
   } else {
     return t('Application completed!');
   }
+}
+
+/**
+ * Render a smartlink application view
+ */
+function smartlink_application_view($smartlink_node, $user) {
+  $content = content_profile_show_profiles($user->uid);
+  return drupal_render($content);
+  //return t('Done');
 }

@@ -38,6 +38,7 @@ function smartlink_views_data() {
     'users' => array(
       'left_field' => 'uid',
       'field' => 'uid',
+      'type' => 'INNER',
     ),
   );
 
@@ -54,6 +55,25 @@ function smartlink_views_data() {
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
+  $data['smartlink']['uid'] = array(
+    'title' => t('Smartlink uid'),
+    'help' => t('The smartlink uid.'),
+    'field' => array(
+      'handler' => 'views_handler_field_user',
+      'click sortable' => TRUE,
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_user_uid',
+      'numeric' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_user_name',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',

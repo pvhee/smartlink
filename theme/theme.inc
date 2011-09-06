@@ -33,11 +33,11 @@ function theme_smartlink_user($data) {
 
   $output .= '<div id="smartlink-wrapper" class="smartlink-complete-wrapper">';
 
-  if (isset($data['percent'])) {
-    $output .= t('!complete%', array(
-      '!complete' => $data['percent']
-    ));
-  }
+//  if (isset($data['percent'])) {
+//    $output .= t('!complete%', array(
+//      '!complete' => $data['percent']
+//    ));
+//  }
 
   // Divide percentages in 4 regions of 25 each
   $data['leq_percent']=0;
@@ -56,6 +56,11 @@ function theme_smartlink_user($data) {
   $output .= '</div>';
 
   $output .= '<div id="smartlink-fields">';
+
+  if (!isset($data['fields'])) {
+    $data['fields'] = array();
+  }
+  
   foreach ($data['fields'] as $i => $field) {
     if (!$field['pass']) {
       switch ($field['operator']) {
@@ -89,8 +94,15 @@ function theme_smartlink_user($data) {
         '!percent_complete' => $field['percent_complete'],
       ));
       $output .= '</div>';
+    } else {
+      $output2 .= '<div id="smartlink-field">';
+      $output2 .= t('Filled out <i>!nextfield</i>', array(
+        '!nextfield' => l(t($field['label']), 'node/'. $data['nid'] .'/apply/'. $data['uid'] .'/'. $field['type_name']),
+      ));
+      $output2 .= '</div>';
     }
   }
+  if (isset($output2)) $output .= $output2;
   $output .= '</div>';
 
 //  if (isset($data['edit']) && $data['edit'] && isset($data['nextfield']) && isset($data['nextpercent'])) {
