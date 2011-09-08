@@ -65,12 +65,3 @@ function smartlink_apply_form($smartlink_node, $user, $type = NULL) {
     return t('Application completed!');
   }
 }
-
-/**
- * Render a smartlink application view
- */
-function smartlink_application_view($smartlink_node, $user) {
-  $content = content_profile_show_profiles($user->uid);
-  return drupal_render($content);
-  //return t('Done');
-}

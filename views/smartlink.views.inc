@@ -50,11 +50,11 @@ function smartlink_views_data() {
       'click sortable' => TRUE,
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument_numeric',
+      'handler' => 'smartlink_views_handler_argument_nid',
       'numeric' => TRUE,
     ),
     'filter' => array(
-      'handler' => 'views_handler_filter_numeric',
+      'handler' => 'smartlink_views_handler_filter_numeric',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -146,6 +146,9 @@ function smartlink_views_handlers() {
       ),
       'smartlink_views_handler_field_data' => array(
         'parent' => 'views_handler_field_custom',
+      ),
+      'smartlink_views_handler_argument_nid' => array(
+        'parent' => 'views_handler_argument_node_nid',
       ),
       
 //      // filter handlers

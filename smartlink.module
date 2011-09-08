@@ -212,17 +212,6 @@ function smartlink_menu() {
     'weight' => 10,
   );
 
-//  $items['node/%node/application/%user_uid_optional'] = array(
-//    'title' => 'Application',
-//    'page callback' => 'smartlink_application_view',
-//    'page arguments' => array(1, 3),
-//    'access callback' => 'smartlink_access',
-//    'access arguments' => array('apply to', 1),
-//    'file' => 'smartlink.pages.inc',
-//    'type' => MENU_LOCAL_TASK,
-//    'weight' => 11,
-//  );
-
   $items['node/%node/calculate'] = array(
     'title' => 'Calculate',
     'page callback' => 'drupal_get_form',
@@ -466,9 +455,14 @@ function smartlink_content_is_empty($item, $field) {
 function smartlink_widget(&$form, &$form_state, $field, $items, $delta = 0) {
   $options = array(
     '' => '', // add empty option
-    'Personal Profile' => smartlink_get_fields_options('personal'),
-    'Business Profile' => smartlink_get_fields_options('business'),
   );
+//    'Personal Profile' => smartlink_get_fields_options('personal'),
+//    'Business Profile' => smartlink_get_fields_options('business'),
+//  );
+
+  foreach (smartlink_get_field_content_types() as $type => $data) {
+    $options[$data['description']] = smartlink_get_fields_options($type);
+  }
 
   $options_operator = array(
     '' => '',
@@ -661,6 +655,15 @@ function theme_smartlink($element) {
   return $element['#children'];
 }
 
+/**
+ * TODO replace by configurable field
+ */
+function smartlink_get_field_content_types() {
+  return array(
+    'personal' => array('description' => 'Personal Profile'),
+    'business' => array('description' => 'Business Profile'),
+  );
+}
 
 function smartlink_get_fields_options($content_type) {
   $result = array();
@@ -683,6 +686,15 @@ function smartlink_get_fields($content_type) {
     foreach ($type['fields'] as $code => $data) {
       $label = (isset($data['widget']['label'])) ? $data['widget']['label'] : $code;
       $data['label'] = $label;
+
+      // Find db storage information; will be used by Views
+      $db_info = content_database_info($data);
+      $columns = array();
+      foreach ($db_info['columns'] as $column_title => $column_data) {
+        $columns[] = $column_data['column'];
+      }
+      $data['columns'] = $columns;
+
       $fields[$code] = $data;
     }
   }
@@ -863,6 +875,7 @@ function _smartlink_calculate_score(&$data) {
 function smartlink_get_tagged_fields($node) {
   // find smartlink field inside or return empty array
   $fields = content_fields(NULL, $node->type);
+
   $smartlink_fields = array();
   foreach ($fields as $field_name => $field_val) {
     if ($field_val['type_name'] == $node->type && $field_val['type'] == 'smartlink') {
@@ -876,6 +889,14 @@ function smartlink_get_tagged_fields($node) {
     foreach ($values as $i => $value) {
       $field_name = $value['field_name'];
       $value['type_name'] = $fields[$field_name]['type_name'];
+
+      // Find db storage information; will be used by Views
+      $db_info = content_database_info($fields[$field_name]);
+      $columns = array();
+      foreach ($db_info['columns'] as $column_title => $column_data) {
+        $columns[] = $column_data['column'];
+      }
+      $value['columns'] = $columns;
 
       $tagged_fields[] = $value;
     }
