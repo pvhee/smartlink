@@ -41,7 +41,7 @@ class smartlink_views_handler_argument_nid extends views_handler_argument_node_n
       }
 
       $fields = array();
-      foreach (smartlink_get_field_content_types() as $type => $desc) {
+      foreach (smartlink_get_field_content_types_options() as $type => $desc) {
         $fields += smartlink_get_fields($type);
       }
       $fields_db = array();

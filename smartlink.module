@@ -366,11 +366,24 @@ function smartlink_field_formatter_info() {
  */
 function smartlink_field_settings($op, $field) {
   switch ($op) {
-    //case 'form':
+    case 'form':
+
+      $options = smartlink_get_field_content_types_options();
+
+      $form['ctypes'] = array(
+        '#tree' => TRUE,
+        '#type' => 'checkboxes',
+        '#title' => t('Content Profile Types'),
+        '#default_value' => $field['ctypes'],
+        '#options' => $options,
+        '#description' => t('Check the content types of which the fields can be selected in this smartlink'),
+      );
+      return $form;
 
     //case 'validate':
 
-    //case 'save':
+    case 'save':
+      return array('ctypes');
 
     case 'database columns':
       return array(
@@ -456,12 +469,11 @@ function smartlink_widget(&$form, &$form_state, $field, $items, $delta = 0) {
   $options = array(
     '' => '', // add empty option
   );
-//    'Personal Profile' => smartlink_get_fields_options('personal'),
-//    'Business Profile' => smartlink_get_fields_options('business'),
-//  );
 
-  foreach (smartlink_get_field_content_types() as $type => $data) {
-    $options[$data['description']] = smartlink_get_fields_options($type);
+  $types = content_types();
+  foreach ($field['ctypes'] as $ctype) {
+    $label = $types[$ctype]['name'];
+    $options[$label] = smartlink_get_fields_options($ctype);
   }
 
   $options_operator = array(
@@ -471,8 +483,6 @@ function smartlink_widget(&$form, &$form_state, $field, $items, $delta = 0) {
     'geq' => t('>='),
     'leq' => t('<='),
   );
-
-  //$options2 = smartlink_get_fields_options('personal') + smartlink_get_fields_options('business');
 
   $element['field_name'] = array(
     '#title' => t('Field'),
@@ -573,23 +583,11 @@ function smartlink_get_enabled_types() {
   return $tagged_types;
 }
 
-/**
- * Return all content types to which we are applying
- * smartlinks.
- */
-function smartlink_get_applied_types() {
-  $types = array(
-    'personal',
-    'business'
-  );
-  return $types;
-}
-
 function smartlink_applied_type($type) {
   if (is_object($type)) {
     $type = $type->type;
   }
-  return in_array($type, smartlink_get_applied_types());
+  return in_array($type, array_keys(smartlink_get_field_content_types_options()));
 }
 
 /**
@@ -656,13 +654,18 @@ function theme_smartlink($element) {
 }
 
 /**
- * TODO replace by configurable field
+ * Return content types that can be used in the smartlink.
+ * @return string
  */
-function smartlink_get_field_content_types() {
-  return array(
-    'personal' => array('description' => 'Personal Profile'),
-    'business' => array('description' => 'Business Profile'),
-  );
+function smartlink_get_field_content_types_options() {
+  $types = content_types();
+  $options = array();
+  foreach ($types as $type => $data) {
+    if (is_content_profile($type)) {
+      $options[$type] = $data['name'];
+    }
+  }
+  return $options;
 }
 
 function smartlink_get_fields_options($content_type) {
