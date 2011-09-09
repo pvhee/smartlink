@@ -20,7 +20,6 @@ function smartlink_block($op = 'list', $delta = 0, $edit = array()) {
           $node = node_load($node_menu->nid);
           $user = user_uid_optional_load(arg(3));
           
-          //$recalculate = TRUE;
           $recalculate = FALSE;
           $data = smartlink_get_data_user($user, $node, $recalculate);
 //          krumo($data);
@@ -734,6 +733,11 @@ function smartlink_get_data_user($user, $smartlink_node, $recalculate = FALSE) {
     // Update the cache
     db_query("DELETE FROM {smartlink} WHERE nid = %d AND uid = %d", $smartlink_node->nid, $user->uid);
     db_query("INSERT INTO {smartlink} SET nid = %d, uid = %d, percent = %d, data = '%s' ", $smartlink_node->nid, $user->uid, $data['percent'], serialize($data));
+
+    // Notify Rules
+    if (module_exists('rules')) {
+      rules_invoke_event('smartlink_user_update', $smartlink_node, $user);
+    }
   }
 
   // UPDATE EDIT PERMISSIONS HERE! they can't be cached
