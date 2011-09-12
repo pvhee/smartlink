@@ -54,7 +54,7 @@ function smartlink_form_alter(&$form, $form_state, $form_id) {
     $form['buttons']['delete']['#access'] = FALSE;
     $form['buttons']['submit']['#value'] = t('Apply');
     $form['#redirect'] = $_GET['q']; // redirect to same page
-    //$form['#cache'] = FALSE; // do not cache, rebuild next time
+    $form['#submit'][] = 'smartlink_form_apply_submit'; // Add extra submit function
 
     $smartlink_nid = arg(1);
     $uid = arg(3);
@@ -88,7 +88,7 @@ function smartlink_form_alter(&$form, $form_state, $form_id) {
       unset($form[$field]);
     }
 
-    //krumo($form);
+
   }
 
   // If a content type is deleted, delete also all its entries in the database; hook onto submit function
@@ -118,6 +118,12 @@ function smartlink_form_alter(&$form, $form_state, $form_id) {
       '#description' => t('Enable the smartlink feature for this content type.'),
     );
   }
+}
+
+function smartlink_form_apply_submit($form, &$form_state) {
+  $t = '5';
+  //print "TOP";
+  
 }
 
 /**
@@ -210,6 +216,42 @@ function smartlink_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => 10,
   );
+
+//  $items['node/%node/apply/%user_uid_optional'] = array(
+//    'title' => 'Apply',
+//    'page callback' => 'smartlink_apply_form_type',
+//    'page arguments' => array(1),
+//    'access callback' => 'smartlink_access',
+//    'access arguments' => array('apply to', 1),
+//    'file' => 'smartlink.pages.inc',
+//    'type' => MENU_LOCAL_TASK,
+//    'weight' => 10,
+//  );
+//
+//    $items['node/%node/apply/%user_uid_optional/personal'] = array(
+//      //'title callback' => 'check_plain',
+//      'title' => 'Personal',
+//      'page callback' => 'smartlink_apply_form_type',
+//      'page arguments' => array(1,4),
+//      'access callback' => 'smartlink_access',
+//      'access arguments' => array('apply to', 1),
+//      'file' => 'smartlink.pages.inc',
+//      'type' => MENU_DEFAULT_LOCAL_TASK,
+//      'weight' => 10,
+//    );
+//
+//        $items['node/%node/apply/%user_uid_optional/business'] = array(
+//      //'title callback' => 'check_plain',
+//      'title' => 'Business',
+//      'page callback' => 'smartlink_apply_form_type',
+//      'page arguments' => array(1,4),
+//      'access callback' => 'smartlink_access',
+//      'access arguments' => array('apply to', 1),
+//      'file' => 'smartlink.pages.inc',
+//      'type' => MENU_LOCAL_TASK,
+//      'weight' => 10,
+//    );
+
 
   $items['node/%node/calculate'] = array(
     'title' => 'Calculate',

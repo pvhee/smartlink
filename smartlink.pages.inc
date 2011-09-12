@@ -65,3 +65,63 @@ function smartlink_apply_form($smartlink_node, $user, $type = NULL) {
     return t('Application completed!');
   }
 }
+
+//function smartlink_apply_form($smartlink_node) {
+//  global $user;
+//  $data = smartlink_get_data_user($user, $smartlink_node);
+//
+//  if (!isset($type)) {
+//    // Find first incomplete field to determine the node edit form
+//    foreach ($data['fields'] as $i => $field) {
+//      if (!$field['completed']) {
+//        $type = $field['type_name'];
+//        break;
+//      }
+//    }
+//  }
+//
+//  if (isset($type)) {
+//    $node = content_profile_load($type, $user->uid);
+//    if (!$node) {
+//      $node = array('uid' => $user->uid, 'name' => (isset($user->name) ? $user->name : ''), 'type' => $type, 'language' => '');
+//    }
+//    module_load_include('inc', 'node', 'node.pages');
+//    return drupal_get_form($type . '_node_form', $node);
+//  } else {
+//    return t('Application completed!');
+//  }
+//}
+
+
+//function smartlink_apply_form_type($smartlink_node, $type) {
+//  global $user;
+//  return t('Type form for type '.$type);
+//
+//
+//  $data = smartlink_get_data_user($user, $smartlink_node);
+//
+//
+//  $fields = smartlink_get_tagged_fields($smartlink_node);
+//  krumo($fields);
+//
+//  if (!isset($type)) {
+//    // Find first incomplete field to determine the node edit form
+//    foreach ($data['fields'] as $i => $field) {
+//      if (!$field['completed']) {
+//        $type = $field['type_name'];
+//        break;
+//      }
+//    }
+//  }
+//
+//  if (isset($type)) {
+//    $node = content_profile_load($type, $user->uid);
+//    if (!$node) {
+//      $node = array('uid' => $user->uid, 'name' => (isset($user->name) ? $user->name : ''), 'type' => $type, 'language' => '');
+//    }
+//    module_load_include('inc', 'node', 'node.pages');
+//    return drupal_get_form($type . '_node_form', $node);
+//  } else {
+//    return t('Application completed!');
+//  }
+//}
