@@ -47,7 +47,7 @@ function smartlink_block($op = 'list', $delta = 0, $edit = array()) {
  * @see smartlink_node_type_delete_confirm_submit()
  * @see smartlink_content_field_remove_form_submit()
  */
-function smartlink_form_alter(&$form, $form_state, $form_id) {
+function smartlink_form_alter(&$form, &$form_state, $form_id) {
   if (isset($form['#node']) && $form['#node']->type .'_node_form' == $form_id && is_content_profile($form['#node']) && arg(0) == 'node' && is_numeric(arg(1)) && is_numeric(arg(3)) && arg(2) == 'apply') {
     // Hide preview and delete buttons
     $form['buttons']['preview']['#access'] = FALSE;
@@ -62,6 +62,9 @@ function smartlink_form_alter(&$form, $form_state, $form_id) {
     $user = user_load($uid);
     $data = smartlink_get_data_user($user, $smartlink_node);
     $type = $form['#node']->type;
+
+    $form_state['storage']['smartlink_nid'] = $smartlink_nid;
+    $form_state['storage']['smartlink_uid'] = $uid;
 
     // Unset fields we don't need for this smartlink
     $fields = array_keys($form['#field_info']);
@@ -121,9 +124,28 @@ function smartlink_form_alter(&$form, $form_state, $form_id) {
 }
 
 function smartlink_form_apply_submit($form, &$form_state) {
-  $t = '5';
-  //print "TOP";
-  
+  $record = db_fetch_object(db_query("SELECT * FROM {smartlink} WHERE nid = %d AND uid = %d", $form_state['storage']['smartlink_nid'], $form_state['storage']['smartlink_uid']));
+  if (!$record) {
+    $record = new stdClass();
+    $record->nid = $form_state['storage']['smartlink_nid'];
+    $record->uid = $form_state['storage']['smartlink_uid'];
+    $record->is_new = TRUE;
+    $record->created = time();
+  } else {
+    $record->is_new = FALSE;
+    if (!$record->created) {
+      $record->created = time();
+    }
+  }
+
+  $record->applied = 1;
+  $record->changed = time();
+
+  if ($record->is_new) {
+    drupal_write_record('smartlink', $record);
+  } else {
+    drupal_write_record('smartlink', $record, array('nid', 'uid'));
+  }
 }
 
 /**

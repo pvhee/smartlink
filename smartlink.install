@@ -56,6 +56,18 @@ function smartlink_schema() {
         'default' => 0,
         'description' => t('The Unix timestamp when the smartlink application was changed.'),
       ),
+      'invited' => array(
+        'description' => t('Boolean indicating whether the user was invited to apply to this smartlink.'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'applied' => array(
+        'description' => t('Boolean indicating whether the user applied to this smartlink.'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'primary key' => array('nid', 'uid'),
     'indexes' => array(

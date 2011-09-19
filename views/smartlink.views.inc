@@ -99,17 +99,6 @@ function smartlink_views_data() {
     ),
   );
 
-//  $data['smartlink']['completed'] = array(
-//    'title' => t('Completed'),
-//    'help' => t('Filter to view whether or not a node is 100% completed.'),
-//    'filter' => array(
-//      'real field' => 'completeness',
-//      'title' => t('Completed'),
-//      'handler' => 'smartlink_views_handler_filter_complete_nodes',
-//      'type' => 'yes-no',
-//    ),
-//  );
-
   $data['smartlink']['data'] = array(
     'title' => t('Smartlink Data'),
     'help' => t('The smartlink data of the user.'),
@@ -118,15 +107,70 @@ function smartlink_views_data() {
       'click sortable' => FALSE,
     ),
   );
-  
-//  $data['smartlink']['content_type'] = array(
-//    'title' => t('Content type'),
-//    'help' => t('Whether or not the content type is used for Content Complete.'),
-//    'filter' => array(
-//      'handler' => 'smartlink_views_handler_filter_content_type',
-//      'label' => t('Is Content Complete enabled content type'),
-//    ),
-//  );
+
+  $data['smartlink']['created'] = array(
+    'title' => t('Application date'),
+    'help' => t('The date the user applied for the smartlink.'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+
+  $data['smartlink']['changed'] = array(
+    'title' => t('Application updated date'),
+    'help' => t('The date the user modified the application for the smartlink.'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+
+  $data['smartlink']['invited'] = array(
+    'title' => t('Invited'),
+    'help' => t('Whether or not the user was invited for this smartlink.'),
+    'field' => array(
+      'handler' => 'views_handler_field_boolean',
+      'click sortable' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_boolean_operator',
+      'label' => t('Invited'),
+      'type' => 'yes-no',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
+  $data['smartlink']['applied'] = array(
+    'title' => t('Applied'),
+    'help' => t('Whether or not the user applied for this smartlink.'),
+    'field' => array(
+      'handler' => 'views_handler_field_boolean',
+      'click sortable' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_boolean_operator',
+      'label' => t('Applied'),
+      'type' => 'yes-no',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
   
   return $data;
 }
@@ -166,18 +210,18 @@ function smartlink_views_handlers() {
   * Implementation of hook_views_plugin().
   */
 function smartlink_views_plugins() {
-  return array(
-    'module' => 'smartlink',
-    'style' => array(
-      'smartlink' => array(
-        'path' => drupal_get_path('module', 'smartlink') . '/views/plugins',
-        'title' => t('Content Complete'),
-        'help' => t('Display completeness for a number of rows.'),
-        'handler' => 'smartlink_style_plugin',
-        'uses row plugin' => TRUE,
-        'uses options' => TRUE,
-        'type' => 'normal',
-      ),
-    ),
-  );
+//  return array(
+//    'module' => 'smartlink',
+//    'style' => array(
+//      'smartlink' => array(
+//        'path' => drupal_get_path('module', 'smartlink') . '/views/plugins',
+//        'title' => t('Content Complete'),
+//        'help' => t('Display completeness for a number of rows.'),
+//        'handler' => 'smartlink_style_plugin',
+//        'uses row plugin' => TRUE,
+//        'uses options' => TRUE,
+//        'type' => 'normal',
+//      ),
+//    ),
+//  );
 }
