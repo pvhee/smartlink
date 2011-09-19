@@ -14,6 +14,30 @@ function smartlink_rules_event_info() {
         'user' => array('type' => 'user', 'label' => t('User')),
       ),
     ),
+   'smartlink_user_applied' => array(
+      'label' => t('After a user has applied for a smartlink'),
+      'module' => 'Smartlink',
+      'arguments' => array(
+        'node' => array('type' => 'node', 'label' => t('Smartlink node')),
+        'user' => array('type' => 'user', 'label' => t('User')),
+      ),
+    ),
+   'smartlink_user_applied_firsttime' => array(
+      'label' => t('After a user has applied for the first time to a smartlink'),
+      'module' => 'Smartlink',
+      'arguments' => array(
+        'node' => array('type' => 'node', 'label' => t('Smartlink node')),
+        'user' => array('type' => 'user', 'label' => t('User')),
+      ),
+    ),
+   'smartlink_user_invited' => array(
+      'label' => t('After a user has been invited for a smartlink'),
+      'module' => 'Smartlink',
+      'arguments' => array(
+        'node' => array('type' => 'node', 'label' => t('Smartlink node')),
+        'user' => array('type' => 'user', 'label' => t('User')),
+      ),
+    ),
   );
 }
 
@@ -37,6 +61,27 @@ function smartlink_rules_condition_info() {
         ),
       ),
       'module' => 'Smartlink',
+    ),
+  );
+}
+
+/**
+ * Implements hook_rules_action_info().
+ *
+ * Provides an action to invite the user to a smartlink node (to be configured).
+ */
+function smartlink_rules_action_info() {
+  return array(
+    'smartlink_action_invite_user_smartlink' => array(
+      'label' => t('Invite user to given smartlink'),
+      'arguments' => array(
+        'user' => array(
+          'type' => 'user',
+          'label' => t('User'),
+        ),
+      ),
+      'module' => 'Smartlink',
+      'eval input' => array('smartlink'),
     ),
   );
 }
@@ -81,4 +126,21 @@ function smartlink_condition_score($node, $user, $settings) {
     case 'less':
       return $score < $score_to_compare;
   }
+}
+
+function smartlink_action_invite_user_smartlink($user, $settings) {
+  $uid = $user->uid;
+  $nid = $settings['smartlink'];
+  smartlink_set_invited_user_smartlink($uid, $nid);
+}
+
+function smartlink_action_invite_user_smartlink_form($settings, &$form) {
+  $settings += array('smartlink' => '');
+
+  $form['settings']['smartlink'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Smartlink'),
+    '#default_value' => $settings['smartlink'],
+    '#description' => t('The smartlink the user is invited to.'),
+  );
 }

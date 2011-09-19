@@ -12,6 +12,10 @@ function smartlink_block($op = 'list', $delta = 0, $edit = array()) {
         $blocks['smartlink_user']['info'] = t('Smartlink: current user');
         $blocks['smartlink_user']['cache'] = BLOCK_NO_CACHE;
 
+        // Block with link to apply for this smartlink.
+        $blocks['smartlink_apply']['info'] = t('Smartlink: apply links');
+        $blocks['smartlink_apply']['cache'] = BLOCK_NO_CACHE;
+
         return $blocks;
       case 'view':
         // Single node completeness (only displayed on full page view of the node)
@@ -22,22 +26,27 @@ function smartlink_block($op = 'list', $delta = 0, $edit = array()) {
           
           $recalculate = FALSE;
           $data = smartlink_get_data_user($user, $node, $recalculate);
-//          krumo($data);
           $block['subject'] = t('Smartlink current user');
           $block['content'] = theme('smartlink_user', $data);
         }
+        
+        if ($delta == 'smartlink_apply') {
+          $node_menu = menu_get_object();
+          $block['subject'] = t('Apply');
+          if (user_is_anonymous()) {
+            $destination = 'node/'.$node_menu->nid.'/apply';
+            $block['content'] = t('<a href="@login">Login</a> or <a href="@register">register</a> to apply', array(
+              '@login' => url('user/login', array('query' => array('destination' => $destination))),
+              '@register' => url('user/register', array('query' => array('destination' => $destination))),
+            ));
+          } else {
+            $url = 'node/'.$node_menu->nid.'/apply';
+            $block['content'] = l('Apply', $url);
+          }
+            
+        }
+
         return $block;
-//      case 'configure':
-//        $form['smartlink_hide_block'] = array(
-//          '#title' => t('Hide the blocks when the percentage reaches 100%'),
-//          '#type' => 'checkbox',
-//          '#default_value' => variable_get('smartlink_hide_complete', TRUE),
-//          '#description' => t('If you disable this feature, all the Content Complete blocks will be shown even when 100% has been reached.'),
-//        );
-//        return $form;
-//      case 'save':
-//        variable_set('smartlink_hide_complete', $edit['smartlink_hide_block']);
-//        return;
     }
 }
 
@@ -48,7 +57,7 @@ function smartlink_block($op = 'list', $delta = 0, $edit = array()) {
  * @see smartlink_content_field_remove_form_submit()
  */
 function smartlink_form_alter(&$form, &$form_state, $form_id) {
-  if (isset($form['#node']) && $form['#node']->type .'_node_form' == $form_id && is_content_profile($form['#node']) && arg(0) == 'node' && is_numeric(arg(1)) && is_numeric(arg(3)) && arg(2) == 'apply') {
+  if (isset($form['#node']) && $form['#node']->type .'_node_form' == $form_id && is_content_profile($form['#node']) && arg(0) == 'node' && is_numeric(arg(1)) && arg(2) == 'apply') {
     // Hide preview and delete buttons
     $form['buttons']['preview']['#access'] = FALSE;
     $form['buttons']['delete']['#access'] = FALSE;
@@ -56,15 +65,14 @@ function smartlink_form_alter(&$form, &$form_state, $form_id) {
     $form['#redirect'] = $_GET['q']; // redirect to same page
     $form['#submit'][] = 'smartlink_form_apply_submit'; // Add extra submit function
 
-    $smartlink_nid = arg(1);
-    $uid = arg(3);
-    $smartlink_node = node_load($smartlink_nid);
-    $user = user_load($uid);
+    $smartlink_node = node_load(arg(1));
+    global $user;
+    
     $data = smartlink_get_data_user($user, $smartlink_node);
     $type = $form['#node']->type;
 
-    $form_state['storage']['smartlink_nid'] = $smartlink_nid;
-    $form_state['storage']['smartlink_uid'] = $uid;
+    $form_state['storage']['smartlink_nid'] = $smartlink_node->nid;
+    $form_state['storage']['smartlink_uid'] = $user->uid;
 
     // Unset fields we don't need for this smartlink
     $fields = array_keys($form['#field_info']);
@@ -90,8 +98,6 @@ function smartlink_form_alter(&$form, &$form_state, $form_id) {
     foreach ($fields_unset as $field) {
       unset($form[$field]);
     }
-
-
   }
 
   // If a content type is deleted, delete also all its entries in the database; hook onto submit function
@@ -124,17 +130,24 @@ function smartlink_form_alter(&$form, &$form_state, $form_id) {
 }
 
 function smartlink_form_apply_submit($form, &$form_state) {
-  $record = db_fetch_object(db_query("SELECT * FROM {smartlink} WHERE nid = %d AND uid = %d", $form_state['storage']['smartlink_nid'], $form_state['storage']['smartlink_uid']));
+  smartlink_set_applied_user_smartlink($form_state['storage']['smartlink_uid'], $form_state['storage']['smartlink_nid']);
+}
+
+function smartlink_set_applied_user_smartlink($uid, $nid) {
+  $first_time = FALSE;
+  $record = db_fetch_object(db_query("SELECT * FROM {smartlink} WHERE nid = %d AND uid = %d", $nid, $uid));
   if (!$record) {
     $record = new stdClass();
-    $record->nid = $form_state['storage']['smartlink_nid'];
-    $record->uid = $form_state['storage']['smartlink_uid'];
+    $record->nid = $nid;
+    $record->uid = $uid;
     $record->is_new = TRUE;
     $record->created = time();
+    $first_time = TRUE;
   } else {
     $record->is_new = FALSE;
     if (!$record->created) {
       $record->created = time();
+      $first_time = TRUE;
     }
   }
 
@@ -145,6 +158,46 @@ function smartlink_form_apply_submit($form, &$form_state) {
     drupal_write_record('smartlink', $record);
   } else {
     drupal_write_record('smartlink', $record, array('nid', 'uid'));
+  }
+
+  // Notify Rules
+  if (module_exists('rules')) {
+    $smartlink_node = node_load($nid);
+    $user = user_load($uid);
+
+    if ($first_time) {
+      rules_invoke_event('smartlink_user_applied_firsttime', $smartlink_node, $user);
+    }
+
+    rules_invoke_event('smartlink_user_applied', $smartlink_node, $user);
+  }
+}
+
+
+function smartlink_set_invited_user_smartlink($uid, $nid) {
+  $record = db_fetch_object(db_query("SELECT * FROM {smartlink} WHERE nid = %d AND uid = %d", $nid, $uid));
+  if (!$record) {
+    $record = new stdClass();
+    $record->nid = $nid;
+    $record->uid = $uid;
+    $record->is_new = TRUE;
+  } else {
+    $record->is_new = FALSE;
+  }
+
+  $record->invited = 1;
+
+  if ($record->is_new) {
+    drupal_write_record('smartlink', $record);
+  } else {
+    drupal_write_record('smartlink', $record, array('nid', 'uid'));
+  }
+
+  // Notify Rules
+  if (module_exists('rules')) {
+    $smartlink_node = node_load($nid);
+    $user = user_load($uid);
+    rules_invoke_event('smartlink_user_invited', $smartlink_node, $user);
   }
 }
 
@@ -228,15 +281,26 @@ function smartlink_perm() {
 function smartlink_menu() {
   $items = array();
 
-  $items['node/%node/apply/%user_uid_optional'] = array(
+  $items['node/%node/apply'] = array(
     'title' => 'Apply',
     'page callback' => 'smartlink_apply_form',
-    'page arguments' => array(1, 3),
+    'page arguments' => array(1),
     'access callback' => 'smartlink_access',
     'access arguments' => array('apply to', 1),
     'file' => 'smartlink.pages.inc',
     'type' => MENU_LOCAL_TASK,
     'weight' => 10,
+  );
+
+  $items['node/%node/calculate'] = array(
+    'title' => 'Calculate',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('smartlink_calculate_tab_form', 1),
+    'access callback' => 'smartlink_access',
+    'access arguments' => array('administer', 1),
+    'file' => 'smartlink.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 20,
   );
 
 //  $items['node/%node/apply/%user_uid_optional'] = array(
@@ -275,16 +339,7 @@ function smartlink_menu() {
 //    );
 
 
-  $items['node/%node/calculate'] = array(
-    'title' => 'Calculate',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('smartlink_calculate_tab_form', 1),
-    'access callback' => 'smartlink_access',
-    'access arguments' => array('administer', 1),
-    'file' => 'smartlink.pages.inc',
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 20,
-  );
+
   
   return $items;
 }
@@ -328,6 +383,17 @@ function smartlink_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
         db_query('DELETE FROM {smartlink} WHERE nid = %d', $node->nid);
         break;
     }
+  }
+}
+
+/**
+ * Implementation of hook_user().
+ */
+function smartlink_user($op, &$edit, &$account, $category = NULL) {
+  switch ($op) {
+    case 'delete':
+      db_query('DELETE FROM {smartlink} WHERE uid = %d', $account->uid);
+      break;
   }
 }
 

@@ -41,7 +41,8 @@ function smartlink_calculate_tab_form_submit($form, &$form_state) {
 /**
  * Render a smartlink application form
  */
-function smartlink_apply_form($smartlink_node, $user, $type = NULL) {
+function smartlink_apply_form($smartlink_node, $type = NULL) {
+  global $user; // use current user
   $data = smartlink_get_data_user($user, $smartlink_node);
 
   if (!isset($type)) {
