@@ -336,7 +336,7 @@ function smartlink_batch($smartlink_nid, &$context) {
   // Initialize sandbox the first time through.
   if (!isset($context['sandbox']['progress'])) {
     // Clear the cache, we will rebuild it entirely.
-    smartlink_clear_cache($smartlink_nid);
+    // smartlink_clear_cache($smartlink_nid);
 
     // Count the number of cache rebuilds we will have to do.
     $max = db_result(db_query('SELECT count(uid) FROM {users}'));
@@ -562,7 +562,7 @@ function smartlink_widget(&$form, &$form_state, $field, $items, $delta = 0) {
     '#maxlength' => 3,
     //'#description' => 'Relative percentage of this field for calculation of total score.',
     '#default_value' => isset($items[$delta]['percentage']) ? $items[$delta]['percentage'] : 100,
-        '#prefix' => '<div style="float:left">',
+    '#prefix' => '<div style="float:left">',
     '#suffix' => '</div>',
   );
 
@@ -773,9 +773,25 @@ function smartlink_get_data_user($user, $smartlink_node, $recalculate = FALSE) {
     $data['uid'] = $user->uid;
 
     // Update the cache
-    db_query("DELETE FROM {smartlink} WHERE nid = %d AND uid = %d", $smartlink_node->nid, $user->uid);
-    db_query("INSERT INTO {smartlink} SET nid = %d, uid = %d, percent = %d, data = '%s' ", $smartlink_node->nid, $user->uid, $data['percent'], serialize($data));
+    $record = db_fetch_object(db_query("SELECT * FROM {smartlink} WHERE nid = %d AND uid = %d", $smartlink_node->nid, $user->uid));
+    if (!$record) {
+      $record = new stdClass();
+      $record->nid = $smartlink_node->nid;
+      $record->uid = $user->uid;
+      $record->is_new = TRUE;
+    } else {
+      $record->is_new = FALSE;
+    }
 
+    $record->data = serialize($data);
+    $record->percent = $data['percent'];
+
+    if ($record->is_new) {
+      drupal_write_record('smartlink', $record);
+    } else {
+      drupal_write_record('smartlink', $record, array('nid', 'uid'));
+    }
+    
     // Notify Rules
     if (module_exists('rules')) {
       rules_invoke_event('smartlink_user_update', $smartlink_node, $user);

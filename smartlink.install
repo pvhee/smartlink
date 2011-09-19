@@ -44,6 +44,18 @@ function smartlink_schema() {
         'size' => 'big',
         'description' => t('Data regarding smartlink for user')
       ),
+      'created' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => t('The Unix timestamp when the smartlink application was created.'),
+      ),
+      'changed' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => t('The Unix timestamp when the smartlink application was changed.'),
+      ),
     ),
     'primary key' => array('nid', 'uid'),
     'indexes' => array(
