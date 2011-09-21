@@ -81,7 +81,7 @@ function theme_smartlink_user($data) {
       }
      $output .= '<div id="smartlink-field">';
      $output .= t('Fail! <i>!nextfield</i> needs to be !operator_text !smartlink_value.', array(
-      '!nextfield' => l(t($field['label']), 'node/'. $data['nid'] .'/apply/'. $data['uid'] .'/'. $field['type_name']),
+      '!nextfield' => l(t($field['label']), 'node/'. $data['nid'] .'/apply/'. $field['type_name']),
       '!operator_text' => $operator_text,
       '!smartlink_value' => $field['value'],
       ));
@@ -90,14 +90,14 @@ function theme_smartlink_user($data) {
     else if (!$field['completed']) {
       $output .= '<div id="smartlink-field">';
       $output .= t('Fill out <i>!nextfield</i> for +!percent_complete%', array(
-        '!nextfield' => l(t($field['label']), 'node/'. $data['nid'] .'/apply/'. $data['uid'] .'/'. $field['type_name']),
+        '!nextfield' => l(t($field['label']), 'node/'. $data['nid'] .'/apply/'. $field['type_name']),
         '!percent_complete' => $field['percent_complete'],
       ));
       $output .= '</div>';
     } else {
       $output2 .= '<div id="smartlink-field">';
       $output2 .= t('Filled out <i>!nextfield</i>', array(
-        '!nextfield' => l(t($field['label']), 'node/'. $data['nid'] .'/apply/'. $data['uid'] .'/'. $field['type_name']),
+        '!nextfield' => l(t($field['label']), 'node/'. $data['nid'] .'/apply/'. $field['type_name']),
       ));
       $output2 .= '</div>';
     }

@@ -46,6 +46,9 @@ function smartlink_apply_form($smartlink_node, $type = NULL) {
   $data = smartlink_get_data_user($user, $smartlink_node);
 
   if (!isset($type)) {
+    // Set a default type
+    $type = (isset($data['fields'][0]['type_name'])) ? $data['fields'][0]['type_name'] : 'personal';
+
     // Find first incomplete field to determine the node edit form
     foreach ($data['fields'] as $i => $field) {
       if (!$field['completed']) {
@@ -55,16 +58,14 @@ function smartlink_apply_form($smartlink_node, $type = NULL) {
     }
   }
 
-  if (isset($type)) {
-    $node = content_profile_load($type, $user->uid);
-    if (!$node) {
-      $node = array('uid' => $user->uid, 'name' => (isset($user->name) ? $user->name : ''), 'type' => $type, 'language' => '');
-    }
-    module_load_include('inc', 'node', 'node.pages');
-    return drupal_get_form($type . '_node_form', $node);
-  } else {
-    return t('Application completed!');
+
+
+  $node = content_profile_load($type, $user->uid);
+  if (!$node) {
+    $node = array('uid' => $user->uid, 'name' => (isset($user->name) ? $user->name : ''), 'type' => $type, 'language' => '');
   }
+  module_load_include('inc', 'node', 'node.pages');
+  return drupal_get_form($type . '_node_form', $node);
 }
 
 //function smartlink_apply_form($smartlink_node) {

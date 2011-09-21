@@ -22,7 +22,7 @@ function smartlink_block($op = 'list', $delta = 0, $edit = array()) {
         if ($delta == 'smartlink_user') {
           $node_menu = menu_get_object();
           $node = node_load($node_menu->nid);
-          $user = user_uid_optional_load(arg(3));
+          global $user;
           
           $recalculate = FALSE;
           $data = smartlink_get_data_user($user, $node, $recalculate);
@@ -89,8 +89,8 @@ function smartlink_form_alter(&$form, &$form_state, $form_id) {
         }
         
 
-        if (!$field['completed']) {
-          //form_set_error($field['field_name'], t('Fill out !field for +!percent%', array('!field' => $field['label'], '!percent' => $field['percent_complete'])));
+        if (!$field['completed'] && empty($form_state['post'])) {
+          form_set_error($field['field_name'], t('Fill out !field for +!percent%', array('!field' => $field['label'], '!percent' => $field['percent_complete'])));
         }
       }
     }
@@ -376,7 +376,15 @@ function smartlink_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
     switch ($op) {
       case 'insert':
       case 'update':
-        drupal_set_message(t('Please recalculate this smartlink'), 'warning');
+        drupal_set_message(t('Please !link this smartlink', array(
+          '!link' => l(t('recalculate'), 'node/'. $node->nid . '/calculate'),
+        )), 'warning');
+
+//        t('Fill out <i>!nextfield</i> for +!percent_complete%', array(
+//        '!nextfield' => l(t($field['label']), 'node/'. $data['nid'] .'/apply/'. $field['type_name']),
+//        '!percent_complete' => $field['percent_complete'],
+
+
         break;
       case 'delete':
         // Remove the cache
