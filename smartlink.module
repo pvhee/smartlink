@@ -948,7 +948,7 @@ function _smartlink_calculate_score_field($node, $smartlink_field, $smartlink_no
 
   $result = $smartlink_field;
   //$result['field_name'] = $field_name;
-  $result['label'] = $field['label'];
+  //$result['label'] = $field['label'];
   //$result['type_name'] = $node->type;
   $result['nid'] = $node->nid;
   
@@ -1050,6 +1050,7 @@ function smartlink_get_tagged_fields($node) {
     foreach ($values as $i => $value) {
       $field_name = $value['field_name'];
       $value['type_name'] = $fields[$field_name]['type_name'];
+      $value['label'] = $fields[$field_name]['widget']['label'];
 
       // Find db storage information; will be used by Views
       $db_info = content_database_info($fields[$field_name]);

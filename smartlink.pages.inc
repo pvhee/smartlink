@@ -58,8 +58,6 @@ function smartlink_apply_form($smartlink_node, $type = NULL) {
     }
   }
 
-
-
   $node = content_profile_load($type, $user->uid);
   if (!$node) {
     $node = array('uid' => $user->uid, 'name' => (isset($user->name) ? $user->name : ''), 'type' => $type, 'language' => '');
