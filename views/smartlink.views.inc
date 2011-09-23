@@ -7,24 +7,6 @@
  */
 
 /**
- * Implementation of hook_views_data_alter().
- */
-//function smartlink_views_data_alter(&$data) {
-//  // smartlink relationship for user
-//  $data['users']['smartlink_rel'] = array(
-//    'group' => t('Node'),
-//    'title' => t('Smartlink'),
-//    'help' => t('Create a relationship to a smartlink of the user -- can be multiple!'),
-//    'relationship' => array(
-//      'handler' => 'views_handler_relationship',
-//      'base' => 'node',
-//      'base field' => 'uid',
-//      'label' => t('Smartlink'),
-//    ),
-//  );
-//}
-
-/**
  * Implementation of hook_views_data()
  */
 function smartlink_views_data() {
@@ -194,34 +176,6 @@ function smartlink_views_handlers() {
       'smartlink_views_handler_argument_nid' => array(
         'parent' => 'views_handler_argument_node_nid',
       ),
-      
-//      // filter handlers
-//      'smartlink_views_handler_filter_content_type' => array(
-//        'parent' => 'views_handler_filter_boolean_operator',
-//      ),
-//      'smartlink_views_handler_filter_complete_nodes' => array(
-//        'parent' => 'views_handler_filter_boolean_operator',
-//      ),
     ),
   );
-}
-
-/**
-  * Implementation of hook_views_plugin().
-  */
-function smartlink_views_plugins() {
-//  return array(
-//    'module' => 'smartlink',
-//    'style' => array(
-//      'smartlink' => array(
-//        'path' => drupal_get_path('module', 'smartlink') . '/views/plugins',
-//        'title' => t('Content Complete'),
-//        'help' => t('Display completeness for a number of rows.'),
-//        'handler' => 'smartlink_style_plugin',
-//        'uses row plugin' => TRUE,
-//        'uses options' => TRUE,
-//        'type' => 'normal',
-//      ),
-//    ),
-//  );
 }

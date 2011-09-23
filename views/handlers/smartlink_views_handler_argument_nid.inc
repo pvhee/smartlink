@@ -17,20 +17,20 @@ class smartlink_views_handler_argument_nid extends views_handler_argument_node_n
 
     $form['smartlink_fields_limit'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Limit Smartlink Fields.'),
-      '#description' => t('If selected, only fields that are included in this smartlink will be rendered.'),
+      '#title' => t('Limit Smartlink Fields and Filters.'),
+      '#description' => t('If selected, only fields and associated filters that are included in this smartlink will be rendered.'),
       '#default_value' => !empty($this->options['smartlink_fields_limit']),
     );
   }
 
-  function query() {
-    parent::query();
+  function pre_query() {
+    parent::pre_query();
 
     /**
      * Extract smartlink node and information given the argument; this expects single values only for the argument!
      */
     if (!empty($this->options['smartlink_fields_limit'])) {
-      $nid = $this->argument;
+      $nid = $this->view->args[0];
       $node = node_load($nid);
       $fields_smartlink = smartlink_get_tagged_fields($node);
       $fields_smartlink_db = array();
@@ -53,9 +53,9 @@ class smartlink_views_handler_argument_nid extends views_handler_argument_node_n
 
       $fields_unset = array_diff($fields_db, $fields_smartlink_db);
       foreach ($fields_unset as $field) {
+        unset($this->view->filter[$field]);
         unset($this->view->field[$field]);
       }
     }
-
   }
 }
