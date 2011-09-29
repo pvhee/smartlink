@@ -61,7 +61,6 @@ function smartlink_form_alter(&$form, &$form_state, $form_id) {
     // Hide preview and delete buttons
     $form['buttons']['preview']['#access'] = FALSE;
     $form['buttons']['delete']['#access'] = FALSE;
-    $form['buttons']['submit']['#value'] = t('Apply');
     $form['#redirect'] = $_GET['q']; // redirect to same page
     $form['#submit'][] = 'smartlink_form_apply_submit'; // Add extra submit function
 
@@ -70,6 +69,8 @@ function smartlink_form_alter(&$form, &$form_state, $form_id) {
     
     $data = smartlink_get_data_user($user, $smartlink_node);
     $type = $form['#node']->type;
+
+
 
     $form_state['storage']['smartlink_nid'] = $smartlink_node->nid;
     $form_state['storage']['smartlink_uid'] = $user->uid;
@@ -97,6 +98,14 @@ function smartlink_form_alter(&$form, &$form_state, $form_id) {
     $fields_unset = array_diff($fields, $fields_smartlink);
     foreach ($fields_unset as $field) {
       unset($form[$field]);
+    }
+
+    // Change name of submit button depending on whether this is the first time that the user applies
+    $metadata = smartlink_get_metadata($user, $smartlink_node); // TODO remove some redundant queries here
+    if (isset($metadata['applied']) && $metadata['applied']) {
+      $form['buttons']['submit']['#value'] = t('Update the application');
+    } else {
+      $form['buttons']['submit']['#value'] = t('Apply');
     }
   }
 
@@ -867,7 +876,7 @@ function smartlink_get_data_user($user, $smartlink_node, $recalculate = FALSE) {
 
     $data = smartlink_get_data($nodes, $smartlink_node, $recalculate);
     $data['uid'] = $user->uid;
-
+    
     // Update the cache
     $record = db_fetch_object(db_query("SELECT * FROM {smartlink} WHERE nid = %d AND uid = %d", $smartlink_node->nid, $user->uid));
     if (!$record) {
@@ -938,6 +947,11 @@ function smartlink_get_data($nodes, $smartlink_node, $recalculate) {
   }
 
   _smartlink_calculate_score($data);  
+  return $data;
+}
+
+function smartlink_get_metadata($user, $smartlink_node) {
+  $data = db_fetch_array(db_query("SELECT created, changed, invited, applied from {smartlink} WHERE nid = %d AND uid = %d", $smartlink_node->nid, $user->uid));
   return $data;
 }
 
