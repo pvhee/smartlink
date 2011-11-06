@@ -11,6 +11,12 @@
  */
 function smartlink_views_data() {
   $data['smartlink']['table']['group']  = t('Smartlink');
+
+  $data['smartlink']['table']['base'] = array(
+    'field' => 'uid',
+    'title' => t('Smartlink'),
+    'help' => t('Smartlinks'),
+  );
   
   $data['smartlink']['table']['join'] = array(
     'node' => array(
@@ -41,6 +47,12 @@ function smartlink_views_data() {
     'sort' => array(
       'handler' => 'views_handler_sort',
     ),
+    'relationship' => array(
+      'base' => 'node',
+      'field' => 'nid',
+      'label' => t('Node'),
+      'handler' => 'views_handler_relationship',
+    ),
   );
 
   $data['smartlink']['uid'] = array(
@@ -60,7 +72,14 @@ function smartlink_views_data() {
     'sort' => array(
       'handler' => 'views_handler_sort',
     ),
+    'relationship' => array(
+      'base' => 'users',
+      'field' => 'uid',
+      'label' => t('Users'),
+      'handler' => 'views_handler_relationship',
+    ),
   );
+
 
   $data['smartlink']['percent'] = array(
     'title' => t('Percent'),
